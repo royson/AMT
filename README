@@ -1,0 +1,45 @@
+An anti-meterpreter network-based intrusion detection system and a bunch of security-info web crawlers.
+
+Files
+-----------
+custom_snort_rules - Rules that can be placed into local rules in Snort and used for our experiment.
+evaluation.py - Run evaluations with .pcap files without deploying AMT. Usage: python evaluation.py 1.pcap 2.pcap .... OR place your pcap files in ./pcaps and run python evaluation.py
+decoder.py - To run the decoding of Meterpreter's 4 bytes XOR encoding offline. Usage: python decoder.py encoded_hexadecimal_string
+AMT.py - Consist of all features of AMT except traffic analysis. Traffic Analysis portion has been written into another script for extension purposes in the near future.
+AMTTA.py - Traffic Analysis on Windows x86 Meterpreter Sessions. 
+extract_cve_details.py - An example of a web crawler used to crawl cvedetails.com to extract information and store it into a local database
+extract_nvd_references.py - An example of extracting references from the NVD and crawling them. Custom crawlers need to be written to cover more sites. File includes securityfocus.com and securitytracker.com examples.
+
+This guide has been tested on a fresh install of Ubuntu 16.04 and
+Ubuntu 16.10, which comes with Python 2.7 and Python 3.5
+# Install the following dependencies and libraries
+$ sudo apt-get install python-pip python-dev build-essential
+$ sudo pip install --upgrade pip
+$ sudo pip install --upgrade virtualenv
+
+### In order to use the evaluation tool to test for false positive
+# Install Scapy
+$ sudo pip install scapy
+$ sudo pip install scapy-ssl_tls
+
+# Run evaluation.py using python 2.7 specifying a list of .pcap files. If
+no parameters are found, evaluation.py searches all .pcap files in
+directory /pcaps.
+$ sudo python2.7 evaluation.py example1.pcap example2.pcap example3.pcap
+
+### Running AMT in a proxy
+# Enable ipv4 forward. Edit /etc/sysctl.conf to make this persistent
+$ sudo sysctl -w net.ipv4.ip_forward=1
+
+# Redirect traffic for evaluation
+$ sudo iptables -A FORWARD -i <interface> -p tcp -d <internal network> -j
+    NFQUEUE --queue-num 1
+
+# For persistence
+$ sudo apt-get install iptables-persistent
+
+# Install Netfilter (\& Scapy if you haven't)
+$ sudo pip install NetfilterQueue
+
+# Run AMT
+$ sudo python2.7 AMT.py
